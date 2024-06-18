@@ -1,0 +1,48 @@
+name: Build and Deploy to Azure
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Setup .NET Core
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: '3.1.x'
+
+    - name: Build with dotnet
+      run: dotnet build --configuration Release
+
+    - name: Publish with dotnet
+      run: dotnet publish -c Release -o ${{ github.workspace }}/publish
+
+    - name: Login to Azure
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+    - name: Deploy arm resources to Azure
+      uses: azure/arm-deploy@v1
+      with:
+        subscriptionId: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+        resourceGroupName: ${{ secrets.AZURE_RESOURCE_GROUP }}
+        template: ./deploy.json
+        parameters: ./deploy.parameters.json
+
+    - name: Deploy to Azure Web App
+      uses: azure/webapps-deploy@v2
+      with:
+        app-name: 'Content-Database-Application'
+        publish-profile: ${{ secrets.AZURE_PUBLISH_PROFILE }}
+        package: './bin/Release/netcoreapp3.1/publish'
+
+    - name: Logout of Azure
+      run: az logout
