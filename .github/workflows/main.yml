@@ -20,14 +20,14 @@ jobs:
       with:
         dotnet-version: '3.1.x'
 
-    - name: restore nuget packages
-      run: dotnet restore
+    #- name: restore nuget packages
+    #  run: dotnet restore
 
-    - name: Build with dotnet
-      run: dotnet build --configuration Release
+    #- name: Build with dotnet
+    #  run: dotnet build --configuration Release
 
-    - name: Publish with dotnet
-      run: dotnet publish -c Release -o ${{ github.workspace }}/publish
+    #- name: Publish with dotnet
+    #  run: dotnet publish -c Release -o ${{ github.workspace }}/publish
 
     - name: Login to Azure
       uses: azure/login@v1
